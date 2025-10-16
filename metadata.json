@@ -1,0 +1,5 @@
+{
+  "name": "Digital Diary Journal",
+  "description": "A personal diary journal application to write down your thoughts, ideas, and save a picture for each day. It's designed to look and feel like a real diary.",
+  "requestFramePermissions": []
+}
