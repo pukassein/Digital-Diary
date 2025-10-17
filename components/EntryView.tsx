@@ -62,7 +62,7 @@ const EntryView: React.FC<EntryViewProps> = ({ entry, onSave, onBack, onDelete, 
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-diary-paper p-6 sm:p-8 md:overflow-y-auto textarea-scrollbar">
+    <div className="w-full h-full flex flex-col bg-diary-paper p-6 sm:p-8 overflow-y-auto textarea-scrollbar">
         {/* Header */}
         <div className="flex justify-between items-start mb-4 pb-4 border-b-2 border-diary-accent">
             <button onClick={onBack} className="text-diary-accent font-bold hover:underline flex items-center gap-1 text-sm md:hidden">
@@ -104,10 +104,10 @@ const EntryView: React.FC<EntryViewProps> = ({ entry, onSave, onBack, onDelete, 
                 <div className="flex flex-col">
                     <label className="font-serif text-diary-dark text-lg mb-2">Today's Memory</label>
                     <div
-                        className={`w-full aspect-video bg-diary-bg rounded-md flex items-center justify-center border-2 border-dashed border-diary-accent/30 relative ${isReadOnly && imagePreview ? 'cursor-pointer' : ''}`}
+                        className={`w-full h-48 bg-diary-bg rounded-md flex items-center justify-center border-2 border-dashed border-diary-accent/30 relative ${imagePreview ? 'cursor-pointer' : ''}`}
                         onClick={() => {
-                            if (isReadOnly && imagePreview) {
-                            onImageClick(imagePreview);
+                            if (imagePreview) {
+                                onImageClick(imagePreview);
                             }
                         }}
                         >
@@ -123,7 +123,10 @@ const EntryView: React.FC<EntryViewProps> = ({ entry, onSave, onBack, onDelete, 
                         )}
                         {!isReadOnly && (
                             <button
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    fileInputRef.current?.click();
+                                }}
                                 className="absolute bottom-2 right-2 p-2 bg-diary-dark/70 text-diary-bg rounded-full hover:bg-diary-dark transition-all"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
