@@ -208,7 +208,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-2 sm:p-4 md:p-8 flex md:items-center md:justify-center bg-diary-bg">
+    <div className="min-h-screen px-2 sm:px-4 md:p-8 flex md:items-center md:justify-center bg-diary-bg">
       {imageModalUrl && (
           <ImageModal imageUrl={imageModalUrl} onClose={closeImageModal} />
       )}
@@ -231,7 +231,7 @@ const App: React.FC = () => {
           onClose={() => setIsRoleModalVisible(false)} 
         />
       )}
-      <div className="w-full max-w-6xl md:h-[90vh] max-h-[1000px] bg-white shadow-2xl rounded-lg flex overflow-hidden border-4 border-diary-dark book-shadow">
+      <div className="w-full max-w-6xl md:h-[90vh] max-h-[1000px] bg-white shadow-2xl rounded-lg flex md:overflow-hidden border-4 border-diary-dark book-shadow">
         {!isDiaryOpen ? (
           <DiaryCover onOpen={handleOpenRequest} />
         ) : (

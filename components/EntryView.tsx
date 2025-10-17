@@ -62,7 +62,7 @@ const EntryView: React.FC<EntryViewProps> = ({ entry, onSave, onBack, onDelete, 
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-diary-paper p-6 sm:p-8 overflow-y-auto textarea-scrollbar">
+    <div className="w-full flex flex-col bg-diary-paper p-6 sm:p-8 md:h-full md:overflow-y-auto md:textarea-scrollbar">
         {/* Header */}
         <div className="flex justify-between items-start mb-4 pb-4 border-b-2 border-diary-accent">
             <button onClick={onBack} className="text-diary-accent font-bold hover:underline flex items-center gap-1 text-sm md:hidden">
