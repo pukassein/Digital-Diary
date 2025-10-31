@@ -18,6 +18,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ entries, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentEntry, setCurrentEntry] = useState<DiaryEntry | null>(null);
+  const [quality, setQuality] = useState<'high' | 'medium' | 'low'>('medium');
   
   const printableRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +56,20 @@ const ExportModal: React.FC<ExportModalProps> = ({ entries, onClose }) => {
 
     setIsLoading(true);
 
+    let canvasScale = 1.5;
+    let imageType = 'image/jpeg';
+    let imageQuality = 0.8;
+
+    if (quality === 'high') {
+      canvasScale = 2;
+      imageType = 'image/png';
+      imageQuality = 1;
+    } else if (quality === 'low') {
+      canvasScale = 1;
+      imageType = 'image/jpeg';
+      imageQuality = 0.7;
+    }
+
     const { jsPDF } = jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = 210;
@@ -63,15 +78,14 @@ const ExportModal: React.FC<ExportModalProps> = ({ entries, onClose }) => {
     for (let i = 0; i < filteredEntries.length; i++) {
         const entry = filteredEntries[i];
         
-        // Use a state to render the printable component, and wait for it to be in the DOM
         await new Promise<void>(resolve => {
             setCurrentEntry(entry);
-            setTimeout(resolve, 50); // Small timeout to ensure DOM update
+            setTimeout(resolve, 50);
         });
 
         if (printableRef.current) {
-            const canvas = await html2canvas(printableRef.current, { scale: 2 });
-            const imgData = canvas.toDataURL('image/png');
+            const canvas = await html2canvas(printableRef.current, { scale: canvasScale });
+            const imgData = canvas.toDataURL(imageType, imageQuality);
             
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
@@ -81,15 +95,37 @@ const ExportModal: React.FC<ExportModalProps> = ({ entries, onClose }) => {
             if (i > 0) {
                 pdf.addPage();
             }
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight > pdfHeight ? pdfHeight : imgHeight);
+            pdf.addImage(imgData, imageType.split('/')[1].toUpperCase(), 0, 0, pdfWidth, imgHeight > pdfHeight ? pdfHeight : imgHeight);
         }
     }
     
-    setCurrentEntry(null); // Clean up the rendered component
+    setCurrentEntry(null);
     pdf.save(`diary-export-${startDate}-to-${endDate}.pdf`);
     setIsLoading(false);
     onClose();
   };
+
+  const QualityButton: React.FC<{
+    value: 'low' | 'medium' | 'high';
+    label: string;
+    position: 'left' | 'middle' | 'right';
+  }> = ({ value, label, position }) => (
+    <button
+      type="button"
+      onClick={() => setQuality(value)}
+      className={`relative inline-flex items-center justify-center w-1/3 px-3 py-2 text-sm font-semibold transition-colors focus:z-10
+        ${position === 'left' ? 'rounded-l-md' : ''}
+        ${position === 'right' ? 'rounded-r-md' : ''}
+        ${position === 'middle' ? '-ml-px' : ''}
+        ${quality === value
+          ? 'bg-diary-accent text-diary-dark'
+          : 'bg-diary-bg text-diary-text hover:bg-diary-accent/20'
+        }
+      `}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <>
@@ -108,31 +144,42 @@ const ExportModal: React.FC<ExportModalProps> = ({ entries, onClose }) => {
         </button>
 
         <h2 className="text-3xl font-serif text-diary-dark mb-6 text-center">Export Entries to PDF</h2>
-        <div className="space-y-4">
-          <p>Select a date range to include in your PDF export. Entries will be sorted chronologically.</p>
-          <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <label htmlFor="start-date" className="block text-lg font-sans text-diary-text mb-1">Start Date:</label>
-                <input
-                    type="date"
-                    id="start-date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-3 bg-diary-bg border-2 border-diary-accent rounded-md focus:ring-2 focus:ring-diary-accent focus:outline-none text-diary-dark font-sans"
-                />
-              </div>
-              <div className="flex-1">
-                <label htmlFor="end-date" className="block text-lg font-sans text-diary-text mb-1">End Date:</label>
-                <input
-                    type="date"
-                    id="end-date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full p-3 bg-diary-bg border-2 border-diary-accent rounded-md focus:ring-2 focus:ring-diary-accent focus:outline-none text-diary-dark font-sans"
-                />
-              </div>
+        <div className="space-y-6">
+          <div>
+            <p className="mb-4">Select a date range to include in your PDF export. Entries will be sorted chronologically.</p>
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label htmlFor="start-date" className="block text-lg font-sans text-diary-text mb-1">Start Date:</label>
+                  <input
+                      type="date"
+                      id="start-date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full p-3 bg-diary-bg border-2 border-diary-accent rounded-md focus:ring-2 focus:ring-diary-accent focus:outline-none text-diary-dark font-sans"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="end-date" className="block text-lg font-sans text-diary-text mb-1">End Date:</label>
+                  <input
+                      type="date"
+                      id="end-date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full p-3 bg-diary-bg border-2 border-diary-accent rounded-md focus:ring-2 focus:ring-diary-accent focus:outline-none text-diary-dark font-sans"
+                  />
+                </div>
+            </div>
           </div>
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <div>
+            <label className="block text-lg font-sans text-diary-text mb-2">Export Quality:</label>
+            <div className="flex rounded-md shadow-sm border border-diary-accent/50 w-full font-sans">
+              <QualityButton value="low" label="Low" position="left" />
+              <QualityButton value="medium" label="Medium" position="middle" />
+              <QualityButton value="high" label="High" position="right" />
+            </div>
+            <p className="text-xs text-diary-text/70 mt-1">Lower quality results in a smaller PDF file size.</p>
+          </div>
+          {error && <p className="text-red-600 text-sm font-sans">{error}</p>}
         </div>
         <div className="mt-8 flex justify-end gap-4">
             <button onClick={onClose} className="px-4 py-2 bg-gray-300 text-gray-800 font-bold font-sans rounded-md hover:bg-gray-400 transition-colors" disabled={isLoading}>
